@@ -20,9 +20,10 @@
 
 /* Home page: generated landscapes, sample routes, menu and the quotation form. */
 
+var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 /* ---------- hero video ---------- */
 var hv = document.getElementById("heroVideo");
-var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 function heroSrc() {
   var w = window.innerWidth;
   if (w > 1100) return "assets/hero-1080.mp4";

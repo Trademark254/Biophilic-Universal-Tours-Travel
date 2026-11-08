@@ -72,3 +72,18 @@ if (themeBtn) {
   document.body.appendChild(a);
   setTimeout(function () { a.classList.add("on"); }, 1500);
 })();
+
+/* Logo: on the home page scroll to the very top; on other pages the link goes to the home page. */
+(function () {
+  var links = document.querySelectorAll("a.brand, a.foot-logo-link, footer a[aria-label*='back to top']");
+  var isHome = document.body.classList.contains("home");
+  for (var i = 0; i < links.length; i++) {
+    links[i].addEventListener("click", function (e) {
+      if (!isHome) return;
+      e.preventDefault();
+      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+      if (history.replaceState) history.replaceState(null, "", location.pathname + location.search);
+    });
+  }
+})();

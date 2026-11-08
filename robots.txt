@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://trademark254.github.io/Biophilic-Universal-Tours-Travel/sitemap.xml

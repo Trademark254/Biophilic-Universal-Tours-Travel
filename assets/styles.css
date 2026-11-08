@@ -90,8 +90,8 @@ nav.main a:hover { color: var(--ink); background: var(--surface); }
 .back-link:hover { color: var(--ink); background: var(--surface); }
 
 /* hero: full-width video behind the text, solid dark tint for legibility */
-.hero { position: relative; overflow: hidden; background: #0E2B1F; color: #F3F6EF; }
 .hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.hero { position: relative; overflow: hidden; background: #0E2B1F; color: #F3F6EF; }
 .hero-scrim { position: absolute; inset: 0; background: rgba(6, 20, 13, 0.58); }
 .hero .wrap { position: relative; z-index: 1; padding-block: clamp(72px, 12vw, 150px) clamp(72px, 9vw, 110px); }
 .hero-copy { max-width: 720px; }
@@ -624,3 +624,24 @@ body.bot-open .bot-fab, body.bot-open .wa-float { opacity: 0; pointer-events: no
 @media (max-width: 480px) { .bot-panel { right: 8px; left: 8px; bottom: 8px; width: auto; height: min(640px, calc(100dvh - 16px)); } }
 @media (prefers-reduced-motion: reduce) { .bot-fab, .bot-fab span, .bot-panel, .bot-panel.on { transition: none; transform: none; } .bot-typing i { animation: none; opacity: 0.8; } }
 @media print { .bot-fab, .bot-panel { display: none; } }
+
+/* Home page: one fixed sunset photo behind everything, hero left transparent. */
+body.home .site-bd img { object-position: 50% 70%; }
+body.home .site-bd::after { background: radial-gradient(120% 90% at 50% 45%, rgba(6,20,13,0) 0%, rgba(6,20,13,.30) 100%), linear-gradient(rgba(6,20,13,.60), rgba(6,20,13,.60)); }
+
+/* Car hire: road photo, scrim slightly lighter so the red road shows. */
+body.bg-car .site-bd img { object-position: 50% 62%; }
+body.bg-car .site-bd::after { background: radial-gradient(120% 90% at 50% 45%, rgba(6,20,13,0) 0%, rgba(6,20,13,.32) 100%), linear-gradient(rgba(6,20,13,.70), rgba(6,20,13,.70)); }
+
+/* Stays: beach photo, darker scrim because the photo is bright. */
+body.bg-stays .site-bd img { object-position: 50% 55%; }
+body.bg-stays .site-bd::after { background: radial-gradient(120% 90% at 50% 45%, rgba(6,20,13,0) 0%, rgba(6,20,13,.30) 100%), linear-gradient(rgba(6,20,13,.72), rgba(6,20,13,.72)); }
+
+/* Safaris: giraffe at sunset, darker scrim because the sky is bright orange. */
+body.bg-safaris .site-bd img { object-position: 50% 60%; }
+body.bg-safaris .site-bd::after { background: radial-gradient(120% 90% at 50% 45%, rgba(6,20,13,0) 0%, rgba(6,20,13,.30) 100%), linear-gradient(rgba(6,20,13,.76), rgba(6,20,13,.76)); }
+
+/* Plain pages (About, Privacy, Terms): calm dark green, no photo. */
+body.bg-plain .site-bd img { display: none; }
+body.bg-plain .site-bd { background: radial-gradient(130% 90% at 50% 0%, #215A3E 0%, #1A4632 40%, #11301F 100%); }
+body.bg-plain .site-bd::after { display: none; }
