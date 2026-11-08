@@ -6,7 +6,7 @@ var CONTACT = {
   phoneRaw: "+254745734823",
   address: "Nairobi, Kenya"
 };
-/* Leave a value empty to hide that icon. LAUNCH TASK: add the Facebook page address. */
+/* Leave a value empty and the icon shows but does nothing yet. LAUNCH TASK: add the Facebook page address. */
 var SOCIAL = {
   facebook: "",
   instagram: "https://www.instagram.com/biophilic_tours",
@@ -40,8 +40,13 @@ var SOCIAL_LABEL = { facebook: "Facebook", instagram: "Instagram", tiktok: "TikT
 var socialBox = document.getElementById("socials");
 if (socialBox) {
   ["facebook", "instagram", "tiktok", "whatsapp"].forEach(function (k) {
-    if (!SOCIAL[k]) return;
     var li = document.createElement("li");
+    if (!SOCIAL[k]) {
+      /* No address yet: show the icon but make it a plain, inactive badge until a link is added above. */
+      li.innerHTML = '<a class="pending" aria-label="' + SOCIAL_LABEL[k] + ' (coming soon)" title="' + SOCIAL_LABEL[k] + ' (coming soon)"><svg viewBox="0 0 24 24" aria-hidden="true">' + ICONS[k] + '</svg></a>';
+      socialBox.appendChild(li);
+      return;
+    }
     li.innerHTML = '<a href="' + SOCIAL[k] + '" target="_blank" rel="noopener" aria-label="' + SOCIAL_LABEL[k] + '" title="' + SOCIAL_LABEL[k] + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + ICONS[k] + '</svg></a>';
     socialBox.appendChild(li);
   });

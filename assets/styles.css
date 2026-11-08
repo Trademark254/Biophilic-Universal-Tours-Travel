@@ -645,3 +645,24 @@ body.bg-safaris .site-bd::after { background: radial-gradient(120% 90% at 50% 45
 body.bg-plain .site-bd img { display: none; }
 body.bg-plain .site-bd { background: radial-gradient(130% 90% at 50% 0%, #215A3E 0%, #1A4632 40%, #11301F 100%); }
 body.bg-plain .site-bd::after { display: none; }
+
+/* Contact rows with icons; the whole row is tappable through the link. */
+.contact-big .c-row { position: relative; display: grid; grid-template-columns: 48px 1fr; align-items: center; gap: 16px; }
+.contact-big .c-ic { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; background: rgba(243,246,239,.10); border: 1px solid rgba(243,246,239,.22); color: #F3F6EF; }
+.contact-big .c-ic svg { width: 22px; height: 22px; }
+.contact-big .c-txt { display: grid; gap: 4px; min-width: 0; font: inherit; }
+.contact-big .c-txt > span:first-child { font: 500 .75rem/1.2 var(--font-mono, "DM Mono", monospace); }
+.contact-big .c-txt > span:last-child { font: 600 clamp(1.15rem, 2.4vw, 1.75rem)/1.2 var(--font-display); letter-spacing: -0.01em; overflow-wrap: anywhere; }
+.contact-big .contact-link::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+.contact-big .c-row:has(.contact-link):hover .c-ic { background: rgba(243,246,239,.2); }
+.contact-big .c-ic { transition: background .2s ease-out; }
+
+/* "Back to home" pill at the top of each inner page. */
+.back-pill { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px; padding: 8px 14px 8px 10px; border-radius: 999px; font-size: .9375rem; font-weight: 500; color: #F3F6EF; text-decoration: none; background: rgba(243,246,239,.10); border: 1px solid rgba(243,246,239,.22); transition: background .2s ease-out, transform .16s ease-out; }
+.back-pill svg { width: 18px; height: 18px; }
+.back-pill:hover { background: rgba(243,246,239,.2); }
+.back-pill:active { transform: scale(.97); }
+.back-pill:focus-visible { outline: 2px solid #E8B04A; outline-offset: 2px; }
+
+/* Social icon with no link yet: same look and hover as the others. */
+.foot .social a.pending { cursor: default; }
