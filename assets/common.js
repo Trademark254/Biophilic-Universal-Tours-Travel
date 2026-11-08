@@ -27,6 +27,7 @@ document.querySelectorAll("[data-contact]").forEach(function (el) {
     el.textContent = v;
   }
 });
+document.querySelectorAll("[data-wa-text]").forEach(function (a) { a.href = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(a.getAttribute("data-wa-text")); });
 document.querySelectorAll("[data-whatsapp-hello]").forEach(function (a) { a.href = WHATSAPP_HELLO; });
 
 var ICONS = {
@@ -60,3 +61,14 @@ if (themeBtn) {
     try { localStorage.setItem("bu-theme", next); } catch (e) {}
   });
 }
+
+/* Floating WhatsApp button on every page. Eases in once the page has settled; no motion if the visitor asks for less. */
+(function () {
+  if (document.getElementById("waFloat")) return;
+  var a = document.createElement("a");
+  a.id = "waFloat"; a.className = "wa-float"; a.href = WHATSAPP_HELLO; a.target = "_blank"; a.rel = "noopener";
+  a.setAttribute("aria-label", "Message us on WhatsApp"); a.title = "Message us on WhatsApp";
+  a.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICONS.whatsapp + '</svg><span>Chat with us</span>';
+  document.body.appendChild(a);
+  setTimeout(function () { a.classList.add("on"); }, 1500);
+})();
