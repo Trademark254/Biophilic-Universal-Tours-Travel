@@ -36,60 +36,20 @@ function playHero() {
   if (pr && pr.catch) pr.catch(function () {});
 }
 /* Visitors who ask their device for reduced motion see the still frame only. */
-if (reduceMotion) { hv.setAttribute("preload", "none"); } else { playHero(); }
+/* Also skip the video on Data Saver or a slow connection: the poster photo shows instead. */
+var conn = navigator.connection || {};
+var slowLink = conn.saveData || /(^|-)2g$/.test(conn.effectiveType || "");
+if (reduceMotion || slowLink) { hv.setAttribute("preload", "none"); } else { playHero(); }
 
-/* ---------- sample routes ---------- */
-var ROUTES = [
-  { t: "Tsavo East Short Break", d: "2 days, 1 night", k: "Road safari", p: "Tsavo East", img: "tsavo-east", alt: "Elephants gathered at a waterhole on red earth, some bathing in the water", x: "Two days on the red-earth plains of Tsavo East, then back to the coast." },
-  { t: "Masai Mara Fly-in", d: "3 days, 2 nights", k: "Fly-in safari", p: "Masai Mara", img: "masai-mara", alt: "Elephants and calves silhouetted against an orange setting sun", x: "Fly to the Mara, spend two nights on the plains and take several game drives." },
-  { t: "Amboseli and Tsavo", d: "4 days, 3 nights", k: "Multi-park", p: "Amboseli, Tsavo West, Tsavo East", img: "amboseli", alt: "Snow-capped Mount Kilimanjaro above acacia trees and open plain", x: "Kilimanjaro rising over the Amboseli plains, then both Tsavo parks on the way back." },
-  { t: "Rift Valley Lakes", d: "3 days, 2 nights", k: "Road safari", p: "Lake Nakuru, Lake Naivasha", img: "rift-valley-lakes", alt: "Flamingos wading and taking off from a lake below green hills", x: "Lake Nakuru and Lake Naivasha for birdlife, rhino, hippo and walks along the shore." },
-  { t: "Samburu in the North", d: "4 days, 3 nights", k: "Road safari", p: "Samburu", img: "samburu", alt: "A herd of eland and acacia trees silhouetted against a golden sunset", x: "Dry northern country with Grevy's zebra, reticulated giraffe, gerenuk and Beisa oryx, rarely seen on southern routes." },
-  { t: "Nairobi to the Coast", d: "7 days, 6 nights", k: "Multi-park", p: "Nairobi, Masai Mara, Lake Nakuru, Amboseli, Tsavo", img: "nairobi-to-the-coast", alt: "Close view of a buffalo with an oxpecker bird on its head", x: "Five parks in one week, ending on the coast." }
-];
-function askUrl(r) {
-  return "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent("Hello Biophilic Universal, I am interested in the " + r.t + " route (" + r.d + ").");
+/* Save data and battery: pause the video when the hero is off screen, play it again when it returns. */
+if (!reduceMotion && "IntersectionObserver" in window) {
+  new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (en.isIntersecting && hv.getAttribute("src")) { var pr = hv.play(); if (pr && pr.catch) pr.catch(function () {}); }
+      else hv.pause();
+    });
+  }, { threshold: 0.05 }).observe(hv.closest(".hero") || hv);
 }
-var routesEl = document.getElementById("routes");
-ROUTES.forEach(function (r) {
-  var el = document.createElement("article");
-  el.className = "route"; el.setAttribute("data-kind", r.k);
-  el.innerHTML = '<div class="art"><span class="tag mono" aria-hidden="true">' + r.p + '</span><img src="assets/routes/' + r.img + '-720.jpg" srcset="assets/routes/' + r.img + '-720.jpg 720w, assets/routes/' + r.img + '-1200.jpg 1200w" sizes="(max-width: 620px) 100vw, (max-width: 960px) 50vw, 380px" width="1200" height="800" alt="' + r.alt + '" loading="lazy" decoding="async"></div>' +
-    '<div class="body"><div class="meta mono"><span>' + r.d + '</span><span class="kind">' + r.k + '</span></div>' +
-    '<h3>' + r.t + '</h3><p>' + r.x + '</p><span class="where mono">' + r.p + '</span>' +
-    '<a class="ask" href="' + askUrl(r) + '" target="_blank" rel="noopener">Ask about this route on WhatsApp</a></div>';
-  el.style.viewTransitionName = "route-" + routesEl.children.length;
-  routesEl.appendChild(el);
-});
-document.getElementById("filters").addEventListener("click", function (e) {
-  var b = e.target.closest("button");
-  if (!b || b.getAttribute("aria-pressed") === "true") return;
-  var f = b.getAttribute("data-f"), cards = [].slice.call(routesEl.querySelectorAll(".route"));
-  var before = cards.map(function (el) { return el.hidden ? null : el.getBoundingClientRect(); });
-  function update() {
-    document.querySelectorAll("#filters button").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
-    cards.forEach(function (el) { el.hidden = !(f === "all" || el.getAttribute("data-kind") === f); });
-  }
-  if (!document.startViewTransition || reduceMotion) { update(); return; }
-  var st = document.createElement("style"), moved = [], fresh = 0;
-  var t = document.startViewTransition(function () {
-    update();
-    cards.forEach(function (el, i) {
-      if (el.hidden) return;
-      if (!before[i]) { st.textContent += "::view-transition-new(route-" + (i + 1) + "){animation-delay:" + (fresh++ * 30) + "ms}"; return; }
-      var r = el.getBoundingClientRect();
-      if (Math.abs(r.left - before[i].left) > 1 || Math.abs(r.top - before[i].top) > 1) moved.push(i + 1);
-    });
-    document.head.appendChild(st);
-  });
-  /* cards that move travel on a shallow arc, not a straight line */
-  t.ready.then(function () {
-    moved.forEach(function (n) {
-      document.documentElement.animate({ translate: ["0 0", "0 -14px", "0 0"] }, { duration: 400, easing: "ease-in-out", pseudoElement: "::view-transition-group(route-" + n + ")" });
-    });
-  }, function () {});
-  t.finished.then(function () { st.remove(); }, function () { st.remove(); });
-});
 
 /* ---------- hero words: four true statements take turns, then it settles ----------
    Each line is taken from the site's own text. The first slide is the page as written, so with no script

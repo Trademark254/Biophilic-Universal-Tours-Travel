@@ -627,7 +627,7 @@ body.bot-open .bot-fab, body.bot-open .wa-float { opacity: 0; pointer-events: no
 
 /* Home page: one fixed sunset photo behind everything, hero left transparent. */
 body.home .site-bd img { object-position: 50% 70%; }
-body.home .site-bd::after { background: radial-gradient(120% 90% at 50% 45%, rgba(6,20,13,0) 0%, rgba(6,20,13,.30) 100%), linear-gradient(rgba(6,20,13,.60), rgba(6,20,13,.60)); }
+body.home .site-bd::after { background: radial-gradient(120% 90% at 50% 45%, rgba(6,20,13,0) 0%, rgba(6,20,13,.30) 100%), linear-gradient(rgba(6,20,13,.67), rgba(6,20,13,.67)); }
 
 /* Car hire: road photo, scrim slightly lighter so the red road shows. */
 body.bg-car .site-bd img { object-position: 50% 62%; }
@@ -666,3 +666,89 @@ body.bg-plain .site-bd::after { display: none; }
 
 /* Social icon with no link yet: same look and hover as the others. */
 .foot .social a.pending { cursor: default; }
+
+/* Larger logo so the words can be read. The navbar pill grows to fit it. */
+.brand .brand-logo { height: 100px; width: auto; }
+body.glass header.site .wrap, body.glass:not(.home) header.site .wrap { min-height: 116px; }
+body.glass header.site, body.glass:not(.home) header.site { margin-bottom: -128px; }
+.foot-logo { width: 280px; }
+@media (max-width: 620px) {
+  .brand .brand-logo { height: 76px; }
+  body.glass header.site .wrap, body.glass:not(.home) header.site .wrap { min-height: 90px; }
+  body.glass header.site, body.glass:not(.home) header.site { margin-bottom: -102px; }
+  .foot-logo { width: 230px; }
+}
+
+/* Logo shrinks once the page is scrolled. The header box keeps its height so nothing below jumps. */
+body.glass header.site, body.glass:not(.home) header.site { height: 116px; }
+body.glass header.site .wrap, body.glass:not(.home) header.site .wrap { transition: min-height 250ms ease-in-out, background-color 250ms ease-in-out, border-color 250ms ease-in-out, box-shadow 250ms ease-in-out; }
+.brand .brand-logo { transition: height 250ms ease-in-out; }
+body.scrolled.glass header.site .wrap, body.scrolled.glass:not(.home) header.site .wrap { min-height: 68px; }
+body.scrolled .brand .brand-logo { height: 52px; }
+@media (max-width: 620px) {
+  body.glass header.site, body.glass:not(.home) header.site { height: 90px; }
+  body.scrolled.glass header.site .wrap, body.scrolled.glass:not(.home) header.site .wrap { min-height: 60px; }
+  body.scrolled .brand .brand-logo { height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.glass header.site .wrap, .brand .brand-logo { transition: none !important; }
+}
+
+/* Destinations grid on the home page. */
+.services.dest-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+@media (min-width: 900px) { .services.dest-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* Gallery page: photo columns with a caption and a larger view on click. */
+.gallery { columns: 3 280px; column-gap: 16px; }
+.gallery figure { margin: 0 0 16px; break-inside: avoid; border-radius: var(--card-r, 14px); overflow: hidden; border: 1px solid var(--card-bd, rgba(243,246,239,.2)); background: var(--panel-bg, rgba(16,44,31,.5)); }
+.gallery button { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; overflow: hidden; }
+.gallery img { display: block; width: 100%; height: auto; transition: transform 400ms ease-out; }
+.gallery button:hover img, .gallery button:focus-visible img { transform: scale(1.04); }
+.gallery button:focus-visible { outline: 2px solid #E8B04A; outline-offset: -2px; }
+.gallery figcaption { padding: 12px 16px 14px; font-size: .9375rem; color: #F3F6EF; }
+.gallery figcaption .mono { display: block; margin-bottom: 2px; color: #E8B04A; }
+dialog.lightbox { border: 0; padding: 0; background: transparent; max-width: 94vw; max-height: 92vh; overflow: visible; }
+dialog.lightbox::backdrop { background: rgba(4, 12, 8, .88); }
+dialog.lightbox img { display: block; max-width: 94vw; max-height: 82vh; width: auto; height: auto; border-radius: 12px; margin: 0 auto; }
+dialog.lightbox p { margin: 12px 0 0; text-align: center; color: #F3F6EF; }
+dialog.lightbox .lb-close { position: absolute; top: -48px; right: 0; width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(243,246,239,.3); background: rgba(16,44,31,.8); color: #F3F6EF; font-size: 1.5rem; line-height: 1; cursor: pointer; }
+dialog.lightbox[open] { animation: lb-in 220ms ease-out; }
+@keyframes lb-in { from { opacity: 0; transform: scale(.95); } to { opacity: 1; transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .gallery img { transition: none; } dialog.lightbox[open] { animation: none; } }
+
+/* Destination cards with a photo on top. */
+body.glass .svc.dest { padding: 0; gap: 0; overflow: hidden; }
+.dest-img { aspect-ratio: 16 / 10; overflow: hidden; background: #123324; }
+.dest-img img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 400ms ease-out; }
+.svc.dest:hover .dest-img img { transform: scale(1.05); }
+.dest-ph { display: grid; place-items: center; color: rgba(243,246,239,.55); background: radial-gradient(120% 120% at 50% 0%, #2A6B4A 0%, #123324 100%); }
+.dest-ph svg { width: 64px; height: 64px; }
+.dest-body { display: grid; gap: 10px; align-content: start; padding: 20px 24px 24px; }
+@media (max-width: 620px) { .dest-body { padding: 16px 20px 20px; } }
+@media (prefers-reduced-motion: reduce) { .dest-img img { transition: none; } }
+
+/* Footer links: a little brighter so they stay readable over the bright sunset. */
+body.glass .foot a { color: #E3EBDD; }
+body.glass .foot a:hover { color: #FFFFFF; }
+
+/* Destination cards: sample trip line, and the wide longer-trip card. */
+.dest-trip { display: block; color: #E3EBDD; font-size: .8125rem; letter-spacing: .02em; }
+.svc.dest.dest-wide { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
+.svc.dest.dest-wide .dest-img { aspect-ratio: auto; min-height: 220px; }
+.svc.dest.dest-wide .dest-body { align-content: center; padding: 28px 32px; }
+@media (max-width: 760px) { .svc.dest.dest-wide { grid-template-columns: 1fr; } .svc.dest.dest-wide .dest-img { aspect-ratio: 16 / 10; min-height: 0; } .svc.dest.dest-wide .dest-body { padding: 16px 20px 20px; } }
+
+/* Trip enquiry form. */
+.enq { max-width: 760px; }
+.enq form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 20px; padding: clamp(20px, 4vw, 32px); border-radius: var(--card-r, 14px); border: 1px solid var(--card-bd, rgba(243,246,239,.2)); background: rgba(14, 43, 31, .7); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); color-scheme: dark; }
+.enq label { display: grid; gap: 6px; font-size: .9375rem; color: #F3F6EF; }
+.enq .full { grid-column: 1 / -1; }
+.enq input, .enq select, .enq textarea { width: 100%; min-height: 48px; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(243,246,239,.3); background: rgba(255,255,255,.08); color: #F3F6EF; font: inherit; }
+.enq textarea { min-height: 110px; resize: vertical; }
+.enq select option { color: #12281F; background: #F3F6EF; }
+.enq input:focus-visible, .enq select:focus-visible, .enq textarea:focus-visible { outline: 2px solid #E8B04A; outline-offset: 2px; }
+.enq input.locked, .enq input[readonly] { background: rgba(255,255,255,.04); color: #A9B8AE; border-style: dashed; cursor: not-allowed; }
+.enq .hint { font-size: .8125rem; color: #C9D6CD; }
+.enq .err { grid-column: 1 / -1; margin: 0; padding: 10px 14px; border-radius: 10px; background: rgba(120, 30, 20, .55); border: 1px solid rgba(255,160,140,.5); color: #FFE9E3; }
+.enq .btn { justify-self: start; }
+@media (max-width: 620px) { .enq form { grid-template-columns: 1fr; } }

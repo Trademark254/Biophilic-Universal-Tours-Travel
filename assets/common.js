@@ -92,3 +92,17 @@ if (themeBtn) {
     });
   }
 })();
+
+/* Shrink the header logo once the visitor scrolls. */
+(function () {
+  var ticking = false;
+  function update() {
+    ticking = false;
+    var on = (window.scrollY || document.documentElement.scrollTop) > 40;
+    if (on !== document.body.classList.contains("scrolled")) document.body.classList.toggle("scrolled", on);
+  }
+  window.addEventListener("scroll", function () {
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  }, { passive: true });
+  update();
+})();
