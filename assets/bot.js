@@ -12,9 +12,12 @@
 
   /* ---------- what the helper knows (taken from the site's own pages) ---------- */
   var KB = [
+    { id: "bookflow", t: "Book a trip", flow: true, a: "",
+      k: ["book a trip", "book now", "make a booking", "i want to book", "i would like to book", "book a safari", "book a stay", "book a car", "book a transfer", "book for me", "help me book", "booking form", "reserve now", "start booking", "how do i book", "how can i book"],
+      c: [] },
     { id: "hello", t: "Hello", k: ["hello", "hi", "hey", "good morning", "good afternoon", "good evening", "jambo", "habari", "start", "help"],
       a: "Hello. I am an automated helper for Biophilic Universal Tours &amp; Travels. I answer from what is on this website. For prices, availability and bookings, our team replies on WhatsApp.",
-      c: ["services", "routes", "contact"] },
+      c: ["bookflow", "services", "routes"] },
     { id: "about", t: "About the company", k: ["about us", "about you", "about the company", "who are you", "who is biophilic", "company", "biophilic", "biophilia", "your name", "story", "background", "history", "how long have you"],
       a: "Biophilic Universal Tours &amp; Travels Ltd is a Kenyan travel company based in Nairobi. One team plans your route, your stay and your vehicle, and sends you one clear quotation. Biophilia means a love of living things, and we apply it by leaving room to watch, walk and sit still. " + L("about.html", "Read more about us") + ".",
       c: ["services", "booking", "trust"] },
@@ -68,7 +71,7 @@
       c: ["price", "children", "contact"], wa: "I would like help finding a place to stay." },
     { id: "booking", t: "How booking works", k: ["book", "booking", "how do i", "how to", "reserve", "reservation", "process", "steps", "confirm", "quotation", "quote"],
       a: "Four steps: 1) Tell us your plan: dates, places, group size and anything you must see. 2) We check availability of routes, lodges and vehicles. 3) You get a written quotation showing what is included and what costs extra. 4) After you confirm, we book each service and stay in touch until you are home.",
-      c: ["price", "payment", "contact"], wa: "I would like to plan a trip." },
+      c: ["bookflow", "price", "payment"], wa: "I would like to plan a trip." },
     { id: "price", t: "Prices and quotes", k: ["price", "prices", "how much", "cheap", "cheapest", "expensive", "afford", "budget", "money", "pay for", "usd", "dollars", "shillings", "ksh", "kes", "discount", "offer price", "package price"],
       a: "Prices depend on the route, the season, the vehicles and the lodges, so we quote for each request. Every quotation lists what is included, what costs extra and the terms that apply. Send your dates, group size and the parks you have in mind and the team replies with a quotation.",
       c: ["booking", "parkfees", "payment"], wa: "Please send me a quotation. My dates, group size and places are:" },
@@ -195,9 +198,11 @@
     busy = true; var d = document.createElement("div"); d.className = "bot-msg bot bot-typing"; d.setAttribute("aria-hidden", "true"); d.innerHTML = "<i></i><i></i><i></i>"; log.appendChild(d); scroll();
     setTimeout(function () { d.remove(); busy = false; cb(); }, 480);
   }
-  function answer(e) { last = e.id; botMsg(e.a, e); }
+  function answer(e) { if (e.flow) { startFlow(); return; } last = e.id; botMsg(e.a, e); }
   function ask(text, id) {
     if (busy) return;
+    if (flow && !id) { flowInput(text); return; }
+    if (flow && id) { endFlow(true); }
     userMsg(text);
     if (id) { typing(function () { answer(BY[id]); }); return; }
     var r = score(text);
@@ -214,6 +219,108 @@
       }
       answer(top.e);
     });
+  }
+
+  /* ---------- guided booking: asks one thing at a time, then opens WhatsApp with everything written out ---------- */
+  var flow = null;
+  var SERVICES = ["Safari", "Stay or BnB", "Car hire", "Transfer", "Experience", "Not sure yet"];
+  var PLACES = ["Masai Mara", "Amboseli", "Tsavo East", "Samburu", "Lake Nakuru", "Lake Naivasha", "Mount Kenya", "Diani Beach", "Nairobi", "Not sure yet"];
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function iso(d) { var m = d.getMonth() + 1, dd = d.getDate(); return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (dd < 10 ? "0" : "") + dd; }
+  function fmt(v) { return /^\d{4}-\d{2}-\d{2}$/.test(v) ? new Date(v + "T00:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" }) : v; }
+  function setInput(type, ph, max) {
+    input.type = type; input.placeholder = ph; input.maxLength = max || 200;
+    if (type === "date") { input.min = iso(new Date()); } else { input.removeAttribute("min"); }
+    input.setAttribute("inputmode", type === "numeric" ? "numeric" : "text");
+    if (type === "numeric") input.type = "text";
+  }
+  function flowChips(list, withCancel) {
+    var w = document.createElement("div"); w.className = "bot-chips";
+    list.forEach(function (t) { var b = document.createElement("button"); b.type = "button"; b.textContent = t; b.addEventListener("click", function () { flowInput(t); }); w.appendChild(b); });
+    if (withCancel !== false) { var c = document.createElement("button"); c.type = "button"; c.textContent = "Cancel"; c.addEventListener("click", function () { flowInput("cancel"); }); w.appendChild(c); }
+    return w;
+  }
+  function endFlow(silent) {
+    flow = null; setInput("text", "Type your question");
+    if (!silent) { botMsg("No problem, I have cleared that. You can ask me anything, or start again whenever you like.", { c: ["bookflow", "services", "contact"] }); }
+  }
+  function startFlow() {
+    flow = { step: "service", d: {} };
+    botMsg("Good, I will take your details one at a time. When we finish, WhatsApp opens with your message already written, and you only press send. This is a booking request, not a confirmed booking: the team checks availability and replies with a price. Type <b>cancel</b> at any time.<br><br>What would you like to book?", null, flowChips(SERVICES), true);
+    setInput("text", "Or type here");
+  }
+  function ask1(step) {
+    var d = flow.d, sv = d.service || ""; flow.step = step;
+    if (step === "where") {
+      var q = /transfer/i.test(sv) ? "Where from and where to? For example: JKIA airport to a hotel in Diani." : /car/i.test(sv) ? "Where will you use the vehicle, and where do you pick it up?" : /stay/i.test(sv) ? "Which area or destination should the stay be in?" : "Which park or place do you have in mind? Pick one or type your own.";
+      botMsg(q, null, flowChips(PLACES), true); setInput("text", "Type a place");
+    } else if (step === "start") {
+      var lab = /stay/i.test(sv) ? "check-in date" : /transfer/i.test(sv) ? "pick-up date" : "start date";
+      botMsg("What is your " + lab + "? Choose it below, then press send.", null, flowChips(["Not sure of the dates yet"]), true); setInput("date", "Pick a date");
+    } else if (step === "end") {
+      var lab2 = /stay/i.test(sv) ? "check-out date" : "last day";
+      botMsg("And your " + lab2 + "?", null, flowChips(["One day only", "Not sure yet"]), true); setInput("date", "Pick a date");
+      if (d.startIso) input.min = d.startIso;
+    } else if (step === "guests") {
+      botMsg("How many people are travelling? Count children too.", null, flowChips(["1", "2", "3", "4", "5", "6", "7 or more"]), true); setInput("text", "Number of people", 3); input.setAttribute("inputmode", "numeric");
+    } else if (step === "name") {
+      botMsg("What is your name?", null, flowChips([], true), true); setInput("text", "Your name", 60);
+    } else if (step === "notes") {
+      botMsg("Anything else the team should know? For example your budget, ages of children, flight number or special needs.", null, flowChips(["Nothing else"]), true); setInput("text", "Optional notes", 300);
+    } else if (step === "confirm") { summary(); }
+    var f = input.type === "date" ? 0 : 1; if (f) setTimeout(function () { input.focus(); }, 80);
+  }
+  function lines() {
+    var d = flow.d, sv = d.service || "", out = [["Service", d.service], ["Where", d.where]];
+    var a = /stay/i.test(sv) ? "Check-in" : /transfer/i.test(sv) ? "Pick-up date" : "Start date", b = /stay/i.test(sv) ? "Check-out" : "Last day";
+    out.push([a, d.start]); if (!/transfer/i.test(sv)) out.push([b, d.end]);
+    out.push(["Guests", d.guests], ["Name", d.name]); if (d.notes) out.push(["Notes", d.notes]);
+    return out;
+  }
+  function summary() {
+    var ls = lines(), html = "Here is your request. Please check it:<br><br>", msg = "I would like to make a booking request.";
+    ls.forEach(function (l) { html += "<b>" + esc(l[0]) + ":</b> " + esc(l[1]) + "<br>"; msg += "\n" + l[0] + ": " + l[1]; });
+    html += "<br>Press the button. WhatsApp opens with this message ready, and you press send there. The team replies with availability and a price.";
+    var w = document.createElement("div"); w.appendChild(waBtn(msg, "Send to the team on WhatsApp"));
+    var c = flowChips(["Start again"], true); w.appendChild(c);
+    botMsg(html, null, w, true);
+    flow.step = "done"; setInput("text", "Type your question");
+  }
+  function flowInput(val) {
+    if (busy || !flow) return;
+    val = String(val).trim(); if (!val) return;
+    var shown = flow.step === "start" || flow.step === "end" ? fmt(val) : val; userMsg(shown);
+    if (/^(cancel|stop|quit|exit|no thanks)$/i.test(val)) { typing(function () { endFlow(); }); return; }
+    if (/^start again$/i.test(val)) { typing(function () { startFlow(); }); return; }
+    var d = flow.d, st = flow.step, today = iso(new Date());
+    function bad(msg) { typing(function () { botMsg(msg); if (st === "start" || st === "end") { setInput("date", "Pick a date"); if (st === "end" && d.startIso) input.min = d.startIso; } }); }
+    function go(n) { typing(function () { ask1(n); }); }
+    if (st === "service") { d.service = val.slice(0, 60); go("where"); }
+    else if (st === "where") { d.where = val.slice(0, 80); go("start"); }
+    else if (st === "start") {
+      if (/^not sure/i.test(val)) { d.start = "Not sure yet"; d.startIso = ""; go(/transfer/i.test(d.service) ? "guests" : "end"); return; }
+      var t = /^\d{4}-\d{2}-\d{2}$/.test(val) ? val : (isNaN(Date.parse(val)) ? "" : iso(new Date(Date.parse(val))));
+      if (!t) { bad("I could not read that date. Please pick it from the calendar."); return; }
+      if (t < today) { bad("That date has already passed. Please pick today or a later date."); return; }
+      d.start = fmt(t); d.startIso = t; go(/transfer/i.test(d.service) ? "guests" : "end");
+    } else if (st === "end") {
+      if (/^one day/i.test(val)) { d.end = "One day only"; go("guests"); return; }
+      if (/^not sure/i.test(val)) { d.end = "Not sure yet"; go("guests"); return; }
+      var e = /^\d{4}-\d{2}-\d{2}$/.test(val) ? val : (isNaN(Date.parse(val)) ? "" : iso(new Date(Date.parse(val))));
+      if (!e) { bad("I could not read that date. Please pick it from the calendar."); return; }
+      if (e < today || (d.startIso && e < d.startIso)) { bad("That date is before your start date. Please pick a later date."); return; }
+      d.end = fmt(e); go("guests");
+    } else if (st === "guests") {
+      if (/^7 or more$/i.test(val)) { d.guests = "7 or more"; go("name"); return; }
+      var n = parseInt(val, 10);
+      if (!/^\d{1,3}$/.test(val) || n < 1) { bad("Please type a number of people, for example 4."); return; }
+      d.guests = String(n); go("name");
+    } else if (st === "name") {
+      if (val.length < 2) { bad("Please type your name."); return; }
+      d.name = val.slice(0, 60); go("notes");
+    } else if (st === "notes") {
+      d.notes = /^nothing else$/i.test(val) ? "" : val.slice(0, 300); go("confirm");
+    } else { typing(function () { botMsg("Your request is ready above. Press the green button to send it, or choose Start again."); }); }
   }
   function open() {
     panel.hidden = false; document.body.classList.add("bot-open"); fab.setAttribute("aria-expanded", "true");
