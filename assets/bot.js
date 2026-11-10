@@ -245,13 +245,15 @@
     if (!silent) { botMsg("No problem, I have cleared that. You can ask me anything, or start again whenever you like.", { c: ["bookflow", "services", "contact"] }); }
   }
   function startFlow() {
-    flow = { step: "service", d: {} };
-    botMsg("Good, I will take your details one at a time. When we finish, WhatsApp opens with your message already written, and you only press send. This is a booking request, not a confirmed booking: the team checks availability and replies with a price. Type <b>cancel</b> at any time.<br><br>What would you like to book?", null, flowChips(SERVICES), true);
-    setInput("text", "Or type here");
+    flow = { step: "name", d: {} };
+    botMsg("Good, I will take your details one at a time. When we finish, WhatsApp opens with your message already written, and you only press send. This is a booking request, not a confirmed booking: the team checks availability and replies with a price. Type <b>cancel</b> at any time.<br><br>First, what is your name?", null, flowChips([], true), true);
+    setInput("text", "Your name", 60); setTimeout(function () { input.focus(); }, 80);
   }
   function ask1(step) {
     var d = flow.d, sv = d.service || ""; flow.step = step;
-    if (step === "where") {
+    if (step === "service") {
+      botMsg("Nice to meet you, " + esc(d.name) + ". What would you like to book?", null, flowChips(SERVICES), true); setInput("text", "Or type here");
+    } else if (step === "where") {
       var q = /transfer/i.test(sv) ? "Where from and where to? For example: JKIA airport to a hotel in Diani." : /car/i.test(sv) ? "Where will you use the vehicle, and where do you pick it up?" : /stay/i.test(sv) ? "Which area or destination should the stay be in?" : "Which park or place do you have in mind? Pick one or type your own.";
       botMsg(q, null, flowChips(PLACES), true); setInput("text", "Type a place");
     } else if (step === "start") {
@@ -271,10 +273,10 @@
     var f = input.type === "date" ? 0 : 1; if (f) setTimeout(function () { input.focus(); }, 80);
   }
   function lines() {
-    var d = flow.d, sv = d.service || "", out = [["Service", d.service], ["Where", d.where]];
+    var d = flow.d, sv = d.service || "", out = [["Name", d.name], ["Service", d.service], ["Where", d.where]];
     var a = /stay/i.test(sv) ? "Check-in" : /transfer/i.test(sv) ? "Pick-up date" : "Start date", b = /stay/i.test(sv) ? "Check-out" : "Last day";
     out.push([a, d.start]); if (!/transfer/i.test(sv)) out.push([b, d.end]);
-    out.push(["Guests", d.guests], ["Name", d.name]); if (d.notes) out.push(["Notes", d.notes]);
+    out.push(["Guests", d.guests]); if (d.notes) out.push(["Notes", d.notes]);
     return out;
   }
   function summary() {
@@ -311,13 +313,13 @@
       if (e < today || (d.startIso && e < d.startIso)) { bad("That date is before your start date. Please pick a later date."); return; }
       d.end = fmt(e); go("guests");
     } else if (st === "guests") {
-      if (/^7 or more$/i.test(val)) { d.guests = "7 or more"; go("name"); return; }
+      if (/^7 or more$/i.test(val)) { d.guests = "7 or more"; go("notes"); return; }
       var n = parseInt(val, 10);
       if (!/^\d{1,3}$/.test(val) || n < 1) { bad("Please type a number of people, for example 4."); return; }
-      d.guests = String(n); go("name");
+      d.guests = String(n); go("notes");
     } else if (st === "name") {
       if (val.length < 2) { bad("Please type your name."); return; }
-      d.name = val.slice(0, 60); go("notes");
+      d.name = val.slice(0, 60); go("service");
     } else if (st === "notes") {
       d.notes = /^nothing else$/i.test(val) ? "" : val.slice(0, 300); go("confirm");
     } else { typing(function () { botMsg("Your request is ready above. Press the green button to send it, or choose Start again."); }); }
