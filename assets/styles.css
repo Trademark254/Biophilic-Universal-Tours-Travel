@@ -793,3 +793,14 @@ body.glass .contact-big div { padding: 12px 18px; }
 .pk-list { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 6px; }
 .pk-list li { position: relative; padding-left: 18px; font-size: .9375rem; line-height: 1.45; color: rgba(243,246,239,.92); }
 .pk-list li::before { content: ""; position: absolute; left: 2px; top: .55em; width: 7px; height: 7px; border-radius: 50%; background: #E8B74E; }
+
+/* Click-to-call button: phones and tablets with touch only. */
+.call-float { display: none; }
+@media (hover: none) and (max-width: 900px) {
+  .call-float { position: fixed; z-index: 40; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(max(16px, env(safe-area-inset-bottom, 0px)) + 128px); display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 52px; background: rgba(16, 44, 31, 0.9); color: var(--snow, #F3F6EF); border: 1px solid rgba(255, 255, 255, 0.28); border-radius: 14px; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 10px 30px rgba(3, 12, 8, 0.35); opacity: 0; transform: translateY(12px) scale(0.95); pointer-events: none; transition: opacity 400ms ease-out, transform 400ms ease-out; }
+  .call-float.on { opacity: 1; transform: none; pointer-events: auto; }
+  .call-float svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .call-float:focus-visible { outline: 3px solid #F3F6EF; outline-offset: 3px; }
+}
+@media (prefers-reduced-motion: reduce) { .call-float { transition: none; transform: none; } }
+@media print { .call-float { display: none; } }

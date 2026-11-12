@@ -78,6 +78,17 @@ if (themeBtn) {
   setTimeout(function () { a.classList.add("on"); }, 1500);
 })();
 
+/* Click-to-call button, phones only: sits above the chat button. */
+(function () {
+  if (document.getElementById("callFloat")) return;
+  var a = document.createElement("a");
+  a.id = "callFloat"; a.className = "call-float"; a.href = "tel:" + CONTACT.phoneRaw;
+  a.setAttribute("aria-label", "Call us"); a.title = "Call us";
+  a.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + '<path d="M5 4h4l2 5-2.500 1.500a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/>' + '</svg>';
+  document.body.appendChild(a);
+  setTimeout(function () { a.classList.add("on"); }, 1700);
+})();
+
 /* Logo: on the home page scroll to the very top; on other pages the link goes to the home page. */
 (function () {
   var links = document.querySelectorAll("a.brand, a.foot-logo-link, footer a[aria-label*='back to top']");
